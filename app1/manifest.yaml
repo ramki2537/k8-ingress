@@ -24,7 +24,7 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name: nginx
+  name: app1
 spec: 
   selector: # lables are used as selectors
       app: app1
@@ -32,4 +32,27 @@ spec:
     - protocol: TCP
       port: 80 #service port
       targetPort: 80
-   
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: minimal-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:340752835677:certificate/dcc8fe60-69b1-4055-a618-d09527b0e838
+    alb.ingress.kubernetes.io/group.name: ramki2537
+spec:
+  ingressClassName: alb
+  rules:
+  - host: "app1.gonew.io"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: app1
+            port:
+              number: 80
